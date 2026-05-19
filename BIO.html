@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerxok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Mono:wght@400;700&family=Cormorant:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #050505;
+  --white: #f5f5f0;
+  --grey: #888880;
+  --dim: #1a1a1a;
+  --border: #222;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Space Mono', monospace;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--white);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.12s ease;
+  mix-blend-mode: difference;
+}
+
+/* ─── HERO ─── */
+#hero {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 20%, rgba(255,255,255,0.02) 0%, transparent 60%);
+}
+
+/* Grid pattern */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+/* Decorative corner marks */
+.corner {
+  position: absolute;
+  width: 40px; height: 40px;
+  border-color: rgba(255,255,255,0.15);
+  border-style: solid;
+}
+.corner.tl { top: 32px; left: 32px; border-width: 1px 0 0 1px; }
+.corner.tr { top: 32px; right: 32px; border-width: 1px 1px 0 0; }
+.corner.bl { bottom: 32px; left: 32px; border-width: 0 0 1px 1px; }
+.corner.br { bottom: 32px; right: 32px; border-width: 0 1px 1px 0; }
+
+.hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 6px;
+  color: var(--grey);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 1s 0.3s forwards;
+}
+
+.hero-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(72px, 14vw, 160px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -4px;
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 1s 0.5s forwards;
+  position: relative;
+}
+
+.hero-name span {
+  display: block;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.45em;
+  letter-spacing: 2px;
+  color: var(--grey);
+  margin-top: 12px;
+}
+
+.hero-line {
+  width: 1px;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+  margin: 40px auto 0;
+  opacity: 0;
+  animation: fadeUp 1s 0.9s forwards;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--grey);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 1s 1.2s forwards;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-scroll::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--grey);
+  animation: scrollLine 2s 1.5s infinite;
+}
+
+@keyframes scrollLine {
+  0%, 100% { transform: scaleX(1); opacity: 0.5; }
+  50% { transform: scaleX(0.3); opacity: 1; }
+}
+
+/* Floating numbers decoration */
+.float-num {
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(100px, 18vw, 240px);
+  font-weight: 900;
+  color: rgba(255,255,255,0.02);
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ─── NIGHT SCENE ─── */
+#night {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #000000 0%,
+    #050510 30%,
+    #080820 60%,
+    #101828 100%
+  );
+}
+
+/* Stars */
+.stars {
+  position: absolute;
+  inset: 0;
+}
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle var(--dur, 3s) var(--delay, 0s) infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: var(--min-op, 0.3); transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Moon */
+.moon {
+  position: absolute;
+  top: 10%;
+  right: 12%;
+  width: 80px; height: 80px;
+}
+.moon-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: #f0e8d0;
+  box-shadow: 0 0 40px rgba(240,232,208,0.3), 0 0 80px rgba(240,232,208,0.1);
+}
+.moon-shadow {
+  position: absolute;
+  top: -4px; right: -8px;
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: #050510;
+}
+
+/* Cityline silhouette */
+.city {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 45%;
+}
+.city svg { width: 100%; height: 100%; }
+
+/* Night text overlay */
+.night-text {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 0 8vw 80px;
+}
+.night-label {
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.night-quote {
+  font-family: 'Cormorant', serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.3;
+  max-width: 700px;
+}
+
+/* ─── BIO SECTION ─── */
+#bio {
+  background: var(--white);
+  color: var(--black);
+  padding: 120px 8vw;
+  position: relative;
+}
+
+.bio-header {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  margin-bottom: 80px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.bio-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.bio-header-sub {
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+/* Cards grid */
+.bio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 2px;
+}
+
+.bio-card {
+  background: var(--black);
+  color: var(--white);
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+
+.bio-card:hover { background: #111; }
+
+.bio-card.large {
+  grid-column: span 2;
+  padding: 64px 40px;
+}
+
+.bio-card.white {
+  background: #f0ede6;
+  color: var(--black);
+}
+.bio-card.white:hover { background: #e8e4dc; }
+
+.bio-card.white .card-label { color: #888; }
+.bio-card.white .card-value { color: var(--black); }
+
+.card-label {
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.card-value {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.card-value.mono {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+.card-num {
+  position: absolute;
+  top: 24px; right: 28px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.15);
+}
+
+.bio-card.white .card-num { color: rgba(0,0,0,0.12); }
+
+/* Code tags */
+.code-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px 16px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+.tag:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.4);
+}
+.tag-dot {
+  width: 5px; height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.bio-card.white .tag {
+  border-color: rgba(0,0,0,0.15);
+}
+.bio-card.white .tag:hover {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.4);
+}
+
+/* Games list */
+.game-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+}
+.game-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  font-style: normal;
+  min-width: 24px;
+}
+
+/* ─── FOOTER ─── */
+#footer {
+  background: var(--black);
+  padding: 80px 8vw 60px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.footer-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 6vw, 72px);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.footer-info {
+  text-align: right;
+}
+
+.footer-label {
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--grey);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.footer-year {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.08);
+  line-height: 1;
+}
+
+/* ─── SCROLL REVEALS ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .bio-grid { grid-template-columns: 1fr; }
+  .bio-card.large { grid-column: span 1; }
+  .corner { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="float-num" style="top:-5%;left:-5%">G</div>
+  <div class="float-num" style="bottom:-8%;right:-3%;opacity:0.015">X</div>
+
+  <p class="hero-eyebrow">Personal Space — Est. 2008</p>
+  <h1 class="hero-name">
+    GERXOK
+    <span>developer · gamer · creator</span>
+  </h1>
+  <div class="hero-line"></div>
+
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- ─── NIGHT SCENE ─── -->
+<section id="night">
+  <div class="sky"></div>
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Moon -->
+  <div class="moon">
+    <div class="moon-circle"></div>
+    <div class="moon-shadow"></div>
+  </div>
+
+  <!-- City silhouette -->
+  <div class="city">
+    <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="
+        M0 400 L0 280
+        L30 280 L30 240 L50 240 L50 200 L70 200 L70 240 L90 240 L90 280
+        L120 280 L120 220 L140 220 L140 180 L160 180 L160 160 L180 160 L180 180 L200 180 L200 220 L220 220
+        L220 260 L240 260 L240 200 L260 200 L260 180 L280 180 L280 160 L290 160 L290 140 L300 140 L300 160 L310 160 L310 180 L320 180 L320 200 L340 200 L340 260
+        L360 260 L360 240 L380 240 L380 200 L400 200 L400 180 L420 180 L420 160 L430 160 L430 120 L440 120 L440 100 L450 100 L450 80 L460 80 L460 100 L470 100 L470 120 L480 120 L480 160 L490 160 L490 180 L500 180 L500 200 L520 200 L520 240 L540 240
+        L540 260 L560 260 L560 230 L580 230 L580 210 L600 210 L600 190 L620 190 L620 170 L640 170 L640 150 L660 150 L660 130 L670 130 L670 110 L680 110 L680 130 L690 130 L690 150 L700 150 L700 170 L720 170 L720 190 L740 190 L740 210 L760 210 L760 230 L780 230
+        L780 250 L800 250 L800 220 L820 220 L820 200 L830 200 L830 180 L840 160 L850 160 L860 140 L870 140 L880 120 L890 120 L900 100 L910 100 L920 120 L930 120 L940 140 L950 140 L960 160 L970 160 L980 180 L990 200 L1000 200 L1000 220 L1020 220 L1020 250
+        L1040 250 L1040 230 L1060 230 L1060 210 L1080 210 L1080 190 L1100 190 L1100 210 L1120 210 L1120 230 L1140 230
+        L1140 260 L1160 260 L1160 240 L1180 240 L1180 220 L1200 220 L1200 200 L1210 200 L1210 180 L1220 180 L1220 160 L1230 160 L1230 140 L1240 140 L1240 160 L1250 160 L1250 180 L1260 180 L1260 200 L1270 200 L1270 220 L1280 220 L1280 240 L1300 240 L1300 260
+        L1320 260 L1320 280 L1360 280 L1360 240 L1380 240 L1380 280 L1410 280 L1410 400 Z
+      " fill="#050505"/>
+      <!-- Windows glow -->
+      <rect x="455" y="85" width="4" height="4" fill="rgba(255,240,180,0.6)"/>
+      <rect x="463" y="85" width="4" height="4" fill="rgba(255,240,180,0.4)"/>
+      <rect x="435" y="125" width="3" height="3" fill="rgba(255,240,180,0.5)"/>
+      <rect x="443" y="125" width="3" height="3" fill="rgba(255,240,180,0.3)"/>
+      <rect x="675" y="115" width="4" height="4" fill="rgba(255,240,180,0.6)"/>
+      <rect x="683" y="115" width="4" height="4" fill="rgba(255,240,180,0.4)"/>
+      <rect x="885" y="105" width="3" height="3" fill="rgba(255,240,180,0.5)"/>
+      <rect x="893" y="105" width="3" height="3" fill="rgba(255,240,180,0.6)"/>
+      <rect x="1235" y="145" width="4" height="4" fill="rgba(255,240,180,0.4)"/>
+      <rect x="165" y="165" width="3" height="3" fill="rgba(255,240,180,0.5)"/>
+      <rect x="173" y="165" width="3" height="3" fill="rgba(255,240,180,0.3)"/>
+    </svg>
+  </div>
+
+  <div class="night-text reveal">
+    <p class="night-label">Обо мне</p>
+    <p class="night-quote">"Код — это способ видеть мир по-другому"</p>
+  </div>
+</section>
+
+<!-- ─── BIO ─── -->
+<section id="bio">
+  <div class="bio-header reveal">
+    <h2>Bio</h2>
+    <span class="bio-header-sub">Gerxok / Ukraine</span>
+  </div>
+
+  <div class="bio-grid">
+
+    <!-- Age -->
+    <div class="bio-card reveal reveal-delay-1">
+      <span class="card-num">01</span>
+      <p class="card-label">Возраст</p>
+      <p class="card-value">16</p>
+    </div>
+
+    <!-- Country -->
+    <div class="bio-card white reveal reveal-delay-2">
+      <span class="card-num">02</span>
+      <p class="card-label">Страна</p>
+      <p class="card-value">Ukraine</p>
+    </div>
+
+    <!-- Games - large -->
+    <div class="bio-card large reveal reveal-delay-1">
+      <span class="card-num">03</span>
+      <p class="card-label">Любимые игры</p>
+      <div style="margin-top:8px">
+        <div class="game-item">
+          <span class="game-num">01.</span>
+          Dota 2
+        </div>
+        <div class="game-item">
+          <span class="game-num">02.</span>
+          Minecraft
+        </div>
+      </div>
+    </div>
+
+    <!-- Coding -->
+    <div class="bio-card large white reveal reveal-delay-2">
+      <span class="card-num">04</span>
+      <p class="card-label" style="color:#888">Языки программирования</p>
+      <div class="code-tags" style="margin-top:20px">
+        <div class="tag"><span class="tag-dot"></span>Python</div>
+        <div class="tag"><span class="tag-dot"></span>Lua</div>
+        <div class="tag"><span class="tag-dot"></span>JavaScript</div>
+        <div class="tag"><span class="tag-dot"></span>Rust</div>
+      </div>
+    </div>
+
+    <!-- Nick -->
+    <div class="bio-card reveal reveal-delay-3" style="grid-column: span 2; background:#0a0a0a; padding: 40px;">
+      <span class="card-num">05</span>
+      <p class="card-label">Никнейм</p>
+      <p class="card-value mono" style="font-size:clamp(14px,2vw,20px); color: rgba(255,255,255,0.5)">
+        $ whoami<br>
+        <span style="color:var(--white)">→ Gerxok</span><br><br>
+        $ location<br>
+        <span style="color:var(--white)">→ Ukraine, 2008</span><br><br>
+        $ skills<br>
+        <span style="color:var(--white)">→ Python, Lua, JS, Rust</span>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer id="footer">
+  <div class="footer-name reveal">GERXOK</div>
+  <div class="footer-info reveal reveal-delay-2">
+    <p class="footer-label">Год</p>
+    <p class="footer-year">2024</p>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top  = my - 4 + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx - 16) * 0.12;
+  ry += (my - ry - 16) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a,button,.bio-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2.5)';
+    ring.style.transform = 'scale(1.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    ring.style.transform = 'scale(1)';
+  });
+});
+
+// Generate stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 180; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%;
+    top:${Math.random()*70}%;
+    --dur:${2+Math.random()*4}s;
+    --delay:${Math.random()*4}s;
+    --min-op:${0.1+Math.random()*0.4};
+    opacity:${Math.random()*0.6+0.2};
+  `;
+  starsEl.appendChild(s);
+}
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
